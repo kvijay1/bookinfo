@@ -1,0 +1,38 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: reviews-default
+spec:
+  hosts:
+  - reviews.default.global
+  location: MESH_INTERNAL
+  ports:
+  - name: http
+    number: 9080
+    protocol: http
+  resolution: DNS
+  addresses:
+  - 240.0.0.2
+  endpoints:
+  - address: ae391d103936640fd8c3ff88fb345476-83641733.eu-central-1.elb.amazonaws.com
+    labels:
+      cluster: k8b
+    ports:
+      http: 15443
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews-global
+spec:
+  host: reviews.default.global
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: v2
+    labels:
+      cluster: k8b
+  - name: v3
+    labels:
+      cluster: k8b
